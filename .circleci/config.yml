@@ -1,0 +1,20 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: researchspace/build-env:3.2.1-0 
+    steps:
+      - checkout
+
+      - restore_cache:
+          name: Restore Yarn Package Cache
+          keys:
+            - yarn-packages-v1-{{ checksum "project/webpack/yarn.lock" }}{{ checksum "metaphacts-platform/web/yarn.lock" }}{{ checksum "researchspace/web/yarn.lock" }}
+            - yarn-packages-v1-
+
+      - run: sh ./build.sh -DplatformVersion=3.2.2-SNAPSHOT -Dbuildjson=researchspace/researchspace-root-build.json -DbuildEnv=prod clean platformZip 
+
+      - save_cache:
+          paths:
+            - ~/.cache/yarn
+          key: yarn-packages-v1-{{ checksum "project/webpack/yarn.lock" }}{{ checksum "metaphacts-platform/web/yarn.lock" }}{{ checksum "researchspace/web/yarn.lock" }}
